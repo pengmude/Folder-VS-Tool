@@ -198,7 +198,8 @@ namespace FindDifferentFiles
                             cnt++;
                         }
                         allNum = List1.Count;
-                    }else
+                    }
+                    else
                         return;
                 }
                 else
@@ -312,6 +313,100 @@ namespace FindDifferentFiles
             }
 
             MessageBox.Show($"文件数：{allNum},另存成功：{cnt}，另存失败：{allNum - cnt}");
+        }
+        /// <summary>
+        /// 移除目录一相同（逻辑：删除目录一中那些“在目录二也存在”的文件）
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void button6_Click(object sender, EventArgs e)
+        {
+            // 1. 检查是否有共有文件
+            if (!flag || List1.Count == 0)
+            {
+                MessageBox.Show("两个目录中没有相同的文件，无需移除。", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            // 2. 二次确认
+            DialogResult result = MessageBox.Show($"确认要删除目录一中 {List1.Count} 个与目录二重复的文件吗？\n此操作不可恢复！", "危险操作确认", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning);
+            if (result != DialogResult.OK) return;
+
+            int successCount = 0;
+            int failCount = 0;
+            string basePath = textBox1.Text; // 目标：目录一
+
+            // 3. 遍历 List1 (共有文件列表) 并删除目录一中的对应文件
+            foreach (var fileName in List1)
+            {
+                try
+                {
+                    string fullPath = Path.Combine(basePath, fileName);
+                    if (File.Exists(fullPath))
+                    {
+                        File.Delete(fullPath);
+                        successCount++;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    failCount++;
+                    // 可以在这里记录日志或忽略
+                }
+            }
+
+            // 4. 提示结果并刷新
+            MessageBox.Show($"目录一清理完成。\n成功删除重复文件: {successCount}\n失败(可能被占用): {failCount}", "结果", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+            // 重新执行对比，刷新列表显示
+            bt_start_Click(sender, e);
+        }
+
+        /// <summary>
+        /// 移除目录二相同（逻辑：删除目录二中那些“在目录一也存在”的文件）
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void button7_Click(object sender, EventArgs e)
+        {
+            // 1. 检查是否有共有文件
+            if (!flag || List1.Count == 0)
+            {
+                MessageBox.Show("两个目录中没有相同的文件，无需移除。", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            // 2. 二次确认
+            DialogResult result = MessageBox.Show($"确认要删除目录二中 {List1.Count} 个与目录一重复的文件吗？\n此操作不可恢复！", "危险操作确认", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning);
+            if (result != DialogResult.OK) return;
+
+            int successCount = 0;
+            int failCount = 0;
+            string basePath = textBox2.Text; // 目标：目录二
+
+            // 3. 遍历 List1 (共有文件列表) 并删除目录二中的对应文件
+            foreach (var fileName in List1)
+            {
+                try
+                {
+                    string fullPath = Path.Combine(basePath, fileName);
+                    if (File.Exists(fullPath))
+                    {
+                        File.Delete(fullPath);
+                        successCount++;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    failCount++;
+                }
+            }
+
+            // 4. 提示结果并刷新
+            MessageBox.Show($"目录二清理完成。\n成功删除重复文件: {successCount}\n失败(可能被占用): {failCount}", "结果", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+            // 重新执行对比，刷新列表显示
+            bt_start_Click(sender, e);
         }
     }
 
